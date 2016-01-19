@@ -8,47 +8,86 @@ using FreePIE.Core.Contracts;
 [GlobalType(Type = typeof(OSVRGlobal))]
 public class OSVRFreePIE : IPlugin
 {
-    public float[] data { get; set; } //float array in which we will store yaw pitch and roll
+    public double[] data { get; set; } //float array in which we will store yaw pitch and roll
     private ClientContext context; //OSVR client context
     private OrientationInterface orientationInterface; //OSVR orientation interface
 
     public event EventHandler Started; //need this for IPlugin interface
 
+
+    public struct Euler
+    {
+        public double yaw;
+        public double pitch;
+        public double roll;
+
+        public Euler(double yaw, double pitch, double roll)
+        {
+            this.yaw = yaw;
+            this.pitch = pitch;
+            this.roll = roll;
+        }
+    }
+
     public OSVRFreePIE()
     {
-        data = new float[3];
+        data = new double[3];
     }
 
     public object CreateGlobal()
     {
         return new OSVRGlobal(this); //the global instance accessible from within FreePIE script engine
     }
-    
+
     //name for the FreePIE GUI
     public string FriendlyName
     {
-        get { return "OSVR interface"; }
+        get { return "OSVR Interface"; }
     }
 
 
-    //method to get the pitch angle from a quaternion
-    private double osvrQuatGetPitch(Quaternion p)
+    //obscure math to transform quaternions into euler, this code is taken from http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+    private Euler quatToEuler(Quaternion q)
     {
-        return Math.Asin(2.0f * (p.x * p.y - p.w * p.z));
 
-    }
+        double sqw = q.w * q.w;
+        double sqx = q.x * q.x;
+        double sqy = q.y * q.y;
+        double sqz = q.z * q.z;
+        double unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
+        double test = q.x * q.y + q.z * q.w;
 
-    //method to get the yaw angle from a quaternion
-    private double osvrQuatGetYaw(Quaternion p)
-    {
-        return Math.Atan2(2.0f * p.x * p.z + 2.0f * p.y * p.w, 1.0f - 2.0f * (p.z * p.z + p.y * p.y));
+        double yaw;
+        double pitch;
+        double roll;
 
-    }
+        if (test > 0.499 * unit)
+        { // singularity at north pole
+            yaw = 2 * Math.Atan2(q.x, q.w);
+            pitch = Math.PI / 2;
+            roll = 0;
+            return new Euler(yaw, pitch, roll);
+        }
+        if (test < -0.499 * unit)
+        { // singularity at south pole
+            yaw = -2 * Math.Atan2(q.x, q.w);
+            pitch = -Math.PI / 2;
+            roll = 0;
+            return new Euler(yaw, pitch, roll);
+        }
+        yaw = Math.Atan2(2 * q.y * q.w - 2 * q.x * q.z, sqx - sqy - sqz + sqw);
+        pitch = Math.Asin(2 * test / unit);
+        roll = Math.Atan2(2 * q.x * q.w - 2 * q.y * q.z, -sqx + sqy - sqz + sqw);
 
-    //method to get the roll angle from a quaternion
-    private double osvrQuatGetRoll(Quaternion p)
-    {
-        return Math.Atan2(2.0f * p.x * p.w + 2.0f * p.z * p.y, 1.0f - 2.0f * (p.y * p.y + p.w * p.w));
+        if (Double.IsNaN(yaw))
+            yaw = 0d;
+        if (Double.IsNaN(pitch))
+            pitch = 0d;
+        if (Double.IsNaN(roll))
+            roll = 0d;
+
+        return new Euler(yaw, pitch, roll);
+
     }
 
 
@@ -63,11 +102,22 @@ public class OSVRFreePIE : IPlugin
 
         //If you just want orientation
         orientationInterface = new OrientationInterface(head);
-        context.SetRoomRotationUsingHead();
+
+        //add orientation callback
+        orientationInterface.StateChanged += OrientationInterface_StateChanged;
+        context.SetRoomRotationUsingHead(); //recenters the hmd position to the current position
         return null;
     }
 
-    //may need to have something in here, OSVR documentation is not clear on this
+    private void OrientationInterface_StateChanged(object sender, TimeValue timestamp, int sensor, Quaternion report)
+    {
+        Euler euler = quatToEuler(report);
+        data[0] = euler.yaw;
+        data[1] = euler.roll; // should be pitch, but for reasons I don't understand roll an pitch are mixed up
+        data[2] = euler.pitch; //should be roll
+    }
+
+    //need this for IPlugin interface
     public void Stop()
     {
 
@@ -76,11 +126,7 @@ public class OSVRFreePIE : IPlugin
     //This method will be executed each iteration of the script
     public void DoBeforeNextExecute()
     {
-        Quaternion now = orientationInterface.GetState().Value;
-        data[0] = (float)osvrQuatGetYaw(now);
-        data[1] = (float)osvrQuatGetPitch(now);
-        data[2] = (float)osvrQuatGetRoll(now);
-
+        //update OSVR context
         context.update();
     }
 
@@ -108,17 +154,17 @@ public class OSVRFreePIE : IPlugin
             this.osvr = osvr;
         }
 
-        public float yaw
+        public double yaw
         {
             get { return osvr.data[0]; }
         }
 
-        public float pitch
+        public double pitch
         {
             get { return osvr.data[1]; }
         }
 
-        public float roll
+        public double roll
         {
             get { return osvr.data[2]; }
         }

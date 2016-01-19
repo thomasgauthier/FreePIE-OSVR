@@ -1,3 +1,6 @@
+#requires VireioSMT.dll in "C:\Program Files (x86)\FreePIE\plugins\"
+#can be found here https://drive.google.com/file/d/0B5t5hd_Bv-frbWVEcmpnRXZOUFk/edit
+
 global yawModifier
 global pitchModifier
 global rollModifier
@@ -13,7 +16,7 @@ def update():
 
 if starting:
     yawModifier = 1.0
-    pitchModifier = -1.0
+    pitchModifier = 1.0
     rollModifier = 1.0
 
     centerYaw = 0
@@ -25,9 +28,9 @@ if starting:
     roll = 0
 
 
-freeTrack.roll  = roll - centerRoll
-freeTrack.yaw = yaw - centerYaw
-freeTrack.pitch = pitch - centerPitch
+vireioSMT.roll  = roll - centerRoll
+vireioSMT.yaw = yaw - centerYaw
+vireioSMT.pitch = pitch - centerPitch
 
 update()
 
@@ -47,9 +50,9 @@ if keyboard.getKeyDown(Key.Home):
 
 
 
-diagnostics.watch(freeTrack.yaw)
-diagnostics.watch(freeTrack.pitch)
-diagnostics.watch(freeTrack.roll)
+diagnostics.watch(vireioSMT.yaw)
+diagnostics.watch(vireioSMT.pitch)
+diagnostics.watch(vireioSMT.roll)
 diagnostics.watch(yawModifier)
 diagnostics.watch(pitchModifier)
 diagnostics.watch(rollModifier)
