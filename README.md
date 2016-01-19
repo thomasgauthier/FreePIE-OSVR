@@ -10,6 +10,8 @@ This is a .NET 4.5 project created with Visual Studio 2015, it should compile ea
 There is a script example for FreePIE in the example folder. Basically you can access OSVR.yaw, OSVR.pitch and OSVR.roll inside FreePIE. All axes are in radian. osvr_server has to be running.
 Positional values (x, y, z) might be added in the future.
 
+Script examples can be found in the example directory.
+
 ##Quirks
 
 Sometime the plugin will output 0 for all values (use *diagnostics.watch(OSVR.yaw)* to test).
