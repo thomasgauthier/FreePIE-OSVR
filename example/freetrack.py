@@ -9,6 +9,13 @@ def update():
     pitch = pitchModifier*filters.continuousRotation(OSVR.pitch)
     global roll
     roll = rollModifier*filters.continuousRotation(OSVR.roll)
+	
+    global x
+    x = OSVR.x
+    global y
+    y = OSVR.y
+    global z
+    z = OSVR.z
     
 
 if starting:
@@ -19,15 +26,26 @@ if starting:
     centerYaw = 0
     centerPitch = 0
     centerRoll = 0
+	
+    centerX = 0
+    centerY = 0
+    centerZ = 0
    
     yaw = 0
     pitch = 0
     roll = 0
 
+    x = 0
+    y = 0
+    z = 0
 
 freeTrack.roll  = roll - centerRoll
 freeTrack.yaw = yaw - centerYaw
 freeTrack.pitch = pitch - centerPitch
+
+freeTrack.x  = x - centerX
+freeTrack.y = y - centerY
+freeTrack.z = z - centerZ
 
 update()
 
@@ -35,6 +53,9 @@ if keyboard.getKeyDown(Key.LeftControl) and keyboard.getPressed(Key.C):
     centerYaw = yaw
     centerPitch = pitch
     centerRoll = roll
+    centerX = x
+    centerY = y
+    centerZ = z
     
 if keyboard.getKeyDown(Key.PageDown):
     yawModifier *= -1
@@ -50,6 +71,9 @@ if keyboard.getKeyDown(Key.Home):
 diagnostics.watch(freeTrack.yaw)
 diagnostics.watch(freeTrack.pitch)
 diagnostics.watch(freeTrack.roll)
+diagnostics.watch(freeTrack.x)
+diagnostics.watch(freeTrack.y)
+diagnostics.watch(freeTrack.z)
 diagnostics.watch(yawModifier)
 diagnostics.watch(pitchModifier)
 diagnostics.watch(rollModifier)

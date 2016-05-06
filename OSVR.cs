@@ -11,6 +11,7 @@ public class OSVRFreePIE : IPlugin
     public double[] data { get; set; } //float array in which we will store yaw pitch and roll
     private ClientContext context; //OSVR client context
     private OrientationInterface orientationInterface; //OSVR orientation interface
+    private PositionInterface positionInterface; //OSVR position interface
 
     public event EventHandler Started; //need this for IPlugin interface
 
@@ -31,7 +32,7 @@ public class OSVRFreePIE : IPlugin
 
     public OSVRFreePIE()
     {
-        data = new double[3];
+        data = new double[6];
     }
 
     public object CreateGlobal()
@@ -100,14 +101,28 @@ public class OSVRFreePIE : IPlugin
         //OSVR interface for the head
         Interface head = context.getInterface("/me/head");
 
-        //If you just want orientation
+        //Orientation Interface
         orientationInterface = new OrientationInterface(head);
 
-        //add orientation callback
+        //Position Interface
+        positionInterface = new PositionInterface(head);
+
+        //add callbacks
         orientationInterface.StateChanged += OrientationInterface_StateChanged;
+        positionInterface.StateChanged += PositionInterface_StateChanged;
+
         context.SetRoomRotationUsingHead(); //recenters the hmd position to the current position
         return null;
     }
+
+
+    private void PositionInterface_StateChanged(object sender, TimeValue timestamp, int sensor, Vec3 report)
+    {
+        data[3] = report.x;
+        data[4] = report.y;
+        data[5] = report.z;
+    }
+
 
     private void OrientationInterface_StateChanged(object sender, TimeValue timestamp, int sensor, Quaternion report)
     {
@@ -167,6 +182,19 @@ public class OSVRFreePIE : IPlugin
         public double roll
         {
             get { return osvr.data[2]; }
+        }
+
+        public double x
+        {
+            get { return osvr.data[3]; }
+        }
+        public double y
+        {
+            get { return osvr.data[4]; }
+        }
+        public double z
+        {
+            get { return osvr.data[5]; }
         }
 
     }
