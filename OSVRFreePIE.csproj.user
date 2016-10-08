@@ -3,5 +3,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files %28x86%29\FreePIE\FreePIE.exe</StartProgram>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ReferencePath>C:\Program Files (x86)\FreePIE\;C:\Program Files (x86)\OSVR\OSVR-Core\bin\</ReferencePath>
   </PropertyGroup>
 </Project>

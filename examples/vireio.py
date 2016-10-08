@@ -1,26 +1,30 @@
 #requires VireioSMT.dll in "C:\Program Files (x86)\FreePIE\plugins\"
 #can be found here https://drive.google.com/file/d/0B4uNjv1ngcxAMHlkTlFIZlVaNGs/view?usp=sharing
 
+global head
 global yawModifier
 global pitchModifier
 global rollModifier
 
 def update():
+	global head
     global yaw
-    yaw = yawModifier*filters.continuousRotation(OSVR.yaw)
+    yaw = yawModifier*filters.continuousRotation(head.yaw)
     global pitch
-    pitch = pitchModifier*filters.continuousRotation(OSVR.pitch)
+    pitch = pitchModifier*filters.continuousRotation(head.pitch)
     global roll
-    roll = rollModifier*filters.continuousRotation(OSVR.roll)
+    roll = rollModifier*filters.continuousRotation(head.roll)
     
     global x
-    x = OSVR.x
+    x = head.x
     global y
-    y = OSVR.y
+    y = head.y
     global z
-    z = OSVR.z
+    z = head.z
 
 if starting:
+	head = OSVR.head()
+
     yawModifier = 1.0
     pitchModifier = 1.0
     rollModifier = 1.0
@@ -41,8 +45,6 @@ if starting:
     y = 0
     z = 0
 
-
-
 vireioSMT.roll  = roll - centerRoll
 vireioSMT.yaw = yaw - centerYaw
 vireioSMT.pitch = pitch - centerPitch
@@ -50,7 +52,6 @@ vireioSMT.pitch = pitch - centerPitch
 vireioSMT.x  = x - centerX
 vireioSMT.y = y - centerY
 vireioSMT.z = z - centerZ
-
 
 update()
 
@@ -70,8 +71,6 @@ if keyboard.getKeyDown(Key.PageUp):
     
 if keyboard.getKeyDown(Key.Home):
     rollModifier *= -1
-
-
 
 diagnostics.watch(vireioSMT.yaw)
 diagnostics.watch(vireioSMT.pitch)
