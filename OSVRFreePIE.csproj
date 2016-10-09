@@ -46,8 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OSVR.cs" />
+    <Compile Include="Button.cs" />
+    <Compile Include="Analog.cs" />
+    <Compile Include="Controller.cs" />
+    <Compile Include="Direction.cs" />
+    <Compile Include="EyeTracker.cs" />
+    <Compile Include="Location2D.cs" />
+    <Compile Include="Locomotion.cs" />
+    <Compile Include="OSVRFreePIE.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tracker.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
